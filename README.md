@@ -1,7 +1,7 @@
 # Spam or Ham classifier
 
 The goal of this project is to build a spam or ham classifier and use it for classifing new messages through a telegram bot where the user can insert a message and receive the result of the classification.
-The dataset used is avaible here: [dataset]() and in the following notebook: [here](https://colab.research.google.com/drive/1rAQg8OOVOhZLY3gREc_ryeLPrzt1c0Ou?usp=sharing) is reported the first phase which has the goal of analyzing the dataset composition, apply preprocessing operation in the dataset and then train two different family of classifier.
+The dataset used is avaible here: [dataset](https://www.kaggle.com/uciml/sms-spam-collection-dataset) and in the following notebook: [here](https://colab.research.google.com/drive/1rAQg8OOVOhZLY3gREc_ryeLPrzt1c0Ou?usp=sharing) is reported the first phase which has the goal of analyzing the dataset composition, apply preprocessing operation in the dataset and then train two different family of classifier.
 
 - One classifier family is build with MultinomialNB classifier and they differ each other for the alpha value.
 - The other classifier family is a SVM and they differ each other for the C value. DISCLAIMER: the time required for build the entire family is high
