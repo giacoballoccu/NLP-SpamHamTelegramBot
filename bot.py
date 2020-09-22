@@ -1,6 +1,7 @@
 import csv
 import logging
 
+import json
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
@@ -8,14 +9,15 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
 import os
 import math
 from csv import writer
-
 import pandas as pd
 
 import preprocessing as pp
 import classification as clf
 
+with open(os.path.join("C:/Users/Giaco/Desktop/TelegramBot", 'secrets.json')) as secrets_file:
+    secrets = json.load(secrets_file)
 
-token_api = "1389332632:AAEEMqYRZthN9DUNbNvycOv9eY5ti-60mGY"
+token_api = secrets['BOT_TELEGRAM_KEY']
 
 
 # Enable logging

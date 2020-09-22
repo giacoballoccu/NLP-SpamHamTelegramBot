@@ -9,17 +9,16 @@ Original file is located at
 
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 from collections import Counter
 import numpy as np
 from sklearn import feature_extraction, model_selection, naive_bayes, metrics, svm
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 
-dataset = pd.read_csv('datasets_483_982_spam.csv', engine='python')
+dataset = pd.read_csv('dataset/datasets_483_982_spam.csv', engine='python')
 
 dataset.head()
 
-#clearing from empty columns
+# clearing from empty columns
 dataset = dataset.rename(columns={'v1': 'class', 'v2': 'message'})
 dataset = dataset.drop(['Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4'], axis=1)
 
@@ -28,26 +27,26 @@ dataset = dataset.drop(['Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4'], axis=1)
 ## Class distribution in dataset
 """
 
-count_Class=pd.value_counts(dataset["class"], sort= True)
-count_Class.plot(kind= 'bar', color= ["blue", "orange"])
+count_Class = pd.value_counts(dataset["class"], sort=True)
+count_Class.plot(kind='bar', color=["blue", "orange"])
 plt.title('Bar chart')
 plt.show()
 
-count_Class.plot(kind = 'pie',  autopct='%1.0f%%')
+count_Class.plot(kind='pie', autopct='%1.0f%%')
 plt.title('Pie chart')
 plt.ylabel('')
 plt.show()
 
 """## Most frequent words in classes"""
 
-count1 = Counter(" ".join(dataset[dataset['class']=='ham']["message"]).split()).most_common(30)
+count1 = Counter(" ".join(dataset[dataset['class'] == 'ham']["message"]).split()).most_common(30)
 df1 = pd.DataFrame.from_dict(count1)
-df1 = df1.rename(columns={0: "words in non-spam", 1 : "count"})
-count2 = Counter(" ".join(dataset[dataset['class']=='spam']["message"]).split()).most_common(30)
+df1 = df1.rename(columns={0: "words in non-spam", 1: "count"})
+count2 = Counter(" ".join(dataset[dataset['class'] == 'spam']["message"]).split()).most_common(30)
 df2 = pd.DataFrame.from_dict(count2)
-df2 = df2.rename(columns={0: "words in spam", 1 : "count_"})
+df2 = df2.rename(columns={0: "words in spam", 1: "count_"})
 
-df1.plot.bar(legend = False)
+df1.plot.bar(legend=False)
 y_pos = np.arange(len(df1["words in non-spam"]))
 plt.xticks(y_pos, df1["words in non-spam"])
 plt.title('More frequent words in ham messages')
@@ -55,7 +54,7 @@ plt.xlabel('words')
 plt.ylabel('number')
 plt.show()
 
-df2.plot.bar(legend = False, color = 'orange')
+df2.plot.bar(legend=False, color='orange')
 y_pos = np.arange(len(df2["words in spam"]))
 plt.xticks(y_pos, df2["words in spam"])
 plt.title('More frequent words in spam messages')
@@ -68,35 +67,38 @@ plt.show()
 ## Most frequent words in classes (Normalizing stopwords)
 """
 
-!pip install -q wordcloud
 import wordcloud
 
 import nltk
+
 nltk.download('stopwords')
 
 from nltk.corpus import stopwords
 import string
+
 string.punctuation
+
 
 def remove_stopwords(mess):
     nopunc = [char for char in mess if char not in string.punctuation]
     nopunc = ''.join(nopunc)
-    
+
     return ' '.join([word for word in nopunc.split() if word.lower() not in stopwords.words('english')])
+
 
 dataset_filtered = dataset
 
 dataset_filtered['message'] = dataset['message'].apply(remove_stopwords)
 dataset_filtered.head()
 
-count1 = Counter(" ".join(dataset_filtered[dataset_filtered['class']=='ham']["message"]).split()).most_common(20)
+count1 = Counter(" ".join(dataset_filtered[dataset_filtered['class'] == 'ham']["message"]).split()).most_common(20)
 df1 = pd.DataFrame.from_dict(count1)
-df1 = df1.rename(columns={0: "words in non-spam", 1 : "count"})
-count2 = Counter(" ".join(dataset_filtered[dataset_filtered['class']=='spam']["message"]).split()).most_common(20)
+df1 = df1.rename(columns={0: "words in non-spam", 1: "count"})
+count2 = Counter(" ".join(dataset_filtered[dataset_filtered['class'] == 'spam']["message"]).split()).most_common(20)
 df2 = pd.DataFrame.from_dict(count2)
-df2 = df2.rename(columns={0: "words in spam", 1 : "count_"})
+df2 = df2.rename(columns={0: "words in spam", 1: "count_"})
 
-df1.plot.bar(legend = False)
+df1.plot.bar(legend=False)
 y_pos = np.arange(len(df1["words in non-spam"]))
 plt.xticks(y_pos, df1["words in non-spam"])
 plt.title('More frequent words in ham messages')
@@ -104,7 +106,7 @@ plt.xlabel('words')
 plt.ylabel('number')
 plt.show()
 
-df2.plot.bar(legend = False, color = 'orange')
+df2.plot.bar(legend=False, color='orange')
 y_pos = np.arange(len(df2["words in spam"]))
 plt.xticks(y_pos, df2["words in spam"])
 plt.title('More frequent words in spam messages')
@@ -117,71 +119,94 @@ plt.show()
 # Preprocessing
 """
 
+
 def lower_message(mess):
-  return mess.lower()
+    return mess.lower()
+
 
 import re
+
+
 def clear_notunicode(mess):
-  return re.sub(r'\W|\b\w*\d\b', ' ', mess)
+    return re.sub(r'\W|\b\w*\d\b', ' ', mess)
+
 
 def tokenize(mess):
-  return mess.split()
+    return mess.split()
+
 
 from nltk.stem import PorterStemmer
+
+
 def stemming(mess):
-  return ' '.join([ PorterStemmer().stem(word) for word in mess.split()])
+    return ' '.join([PorterStemmer().stem(word) for word in mess.split()])
+
 
 def slang_to_english(mess):
-  mess = mess.split()
-  dictionary = {'u':'you', 'ppl':'people', 'bc':'because', 'bs': 'bullshit', 'cya': 'see you', 'omg': 'oh my god', 'hf': 'have fun', 'gl': 'good luck',
-                'w/o': 'without', 'luv':'love', 'prob': 'probably', 'wp': 'well played', 'gg': 'good game', 'yg': 'young gunner', 'fud':'food',
-                'btw': 'by the way', 'omw': 'on my way', 'y\'all': 'you all', 'f**king': 'fucking', 'cud':'could','f***ing': 'fucking', 'kul':'cool',
-                'a**hole': 'asshole', 'fyn':'fine', 'f***': 'fuck', 'yur': 'your', 'gr8': 'great', 'pdx': 'portland', 'govt': 'government',
-                'yr': 'your', 'wud':'would','lyk':'like','wateva':'whatever','ttyl':'talk to you later', 'fam':'family', 'ty': 'thank you', 
-                'omg':'oh my god', 'blvd': 'boulevard', 'bruh':'brother', 'hv': 'have', 'dy': 'day', 'bihday': 'birthday', 'impoant': 'important',
-                'nutshel': 'nutshell', 'exactli': 'exactly', 'fishi': 'fishy', 'easili': 'easily', 'Ima': 'i am going to',
-                'Y’all': 'you all', 'urd': 'agree', 'wkly': 'weekly', 'dunno': 'don\'t know', 'alr': 'already', '2': 'to', '4': 'for'}
-  for idx, word in enumerate(mess):
-    if word.lower() in dictionary:
-      mess[idx] = dictionary[word]
-  return ' '.join(mess)
+    mess = mess.split()
+    dictionary = {'u': 'you', 'ppl': 'people', 'bc': 'because', 'bs': 'bullshit', 'cya': 'see you', 'omg': 'oh my god',
+                  'hf': 'have fun', 'gl': 'good luck',
+                  'w/o': 'without', 'luv': 'love', 'prob': 'probably', 'wp': 'well played', 'gg': 'good game',
+                  'yg': 'young gunner', 'fud': 'food',
+                  'btw': 'by the way', 'omw': 'on my way', 'y\'all': 'you all', 'f**king': 'fucking', 'cud': 'could',
+                  'f***ing': 'fucking', 'kul': 'cool',
+                  'a**hole': 'asshole', 'fyn': 'fine', 'f***': 'fuck', 'yur': 'your', 'gr8': 'great', 'pdx': 'portland',
+                  'govt': 'government',
+                  'yr': 'your', 'wud': 'would', 'lyk': 'like', 'wateva': 'whatever', 'ttyl': 'talk to you later',
+                  'fam': 'family', 'ty': 'thank you',
+                  'omg': 'oh my god', 'blvd': 'boulevard', 'bruh': 'brother', 'hv': 'have', 'dy': 'day',
+                  'bihday': 'birthday', 'impoant': 'important',
+                  'nutshel': 'nutshell', 'exactli': 'exactly', 'fishi': 'fishy', 'easili': 'easily',
+                  'Ima': 'i am going to',
+                  'Y’all': 'you all', 'urd': 'agree', 'wkly': 'weekly', 'dunno': 'don\'t know', 'alr': 'already',
+                  '2': 'to', '4': 'for'}
+    for idx, word in enumerate(mess):
+        if word.lower() in dictionary:
+            mess[idx] = dictionary[word]
+    return ' '.join(mess)
+
 
 def remove_puntuaction(mess):
-  s.translate(None, string.punctuation)
+    mess.translate(None, string.punctuation)
 
-#dataset_filtered['message'] = dataset_filtered['message'].apply(lower_message)
-#dataset_filtered.head()
 
-#dataset_filtered['message'] = dataset_filtered['message'].apply(slang_to_english)
- #dataset_filtered.head()
+# dataset_filtered['message'] = dataset_filtered['message'].apply(lower_message)
+# dataset_filtered.head()
+
+# dataset_filtered['message'] = dataset_filtered['message'].apply(slang_to_english)
+# dataset_filtered.head()
 
 dataset_filtered['message'] = dataset_filtered['message'].apply(stemming)
- #dataset_filtered.head()
+# dataset_filtered.head()
 
 dataset_filtered.to_csv("dataset_preprocessed.csv")
 
 dataset_filtered['message'] = dataset_filtered['message'].apply(tokenize)
- dataset_filtered.head()
+dataset_filtered.head()
 
-#Binarization of the class label attribute
-dataset_filtered["class"]=dataset_filtered["class"].map({'spam':1,'ham':0})
+# Binarization of the class label attribute
+dataset_filtered["class"] = dataset_filtered["class"].map({'spam': 1, 'ham': 0})
 
 y = dataset_filtered['class']
 
-#Cross validation
-X_train, X_test, y_train, y_test = model_selection.train_test_split(dataset_filtered.drop(['class'], axis = 1), dataset_filtered['class'], test_size=0.3, stratify=y, random_state=42)
+# Cross validation
+X_train, X_test, y_train, y_test = model_selection.train_test_split(dataset_filtered.drop(['class'], axis=1),
+                                                                    dataset_filtered['class'], test_size=0.3,
+                                                                    stratify=y, random_state=42)
 print([np.shape(X_train), np.shape(X_test)])
 n_spam = 0
 n_ham = 0
 for x in y_train:
-  if x == 1:
-    n_spam += 1
-  else:
-    n_ham += 1
+    if x == 1:
+        n_spam += 1
+    else:
+        n_ham += 1
 print(n_spam, n_ham)
 
+
 def same_x(x):
-  return x
+    return x
+
 
 vectorizer = TfidfVectorizer(preprocessor=same_x, tokenizer=same_x)
 # train
@@ -202,7 +227,8 @@ The purpose is to find the best bayesian classifier from a family of classifier 
 """
 
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import classification_report,confusion_matrix, accuracy_score
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+
 list_alpha = np.arange(0.2, 2, 0.2)
 score_train_bayes = np.zeros(len(list_alpha))
 score_test_bayes = np.zeros(len(list_alpha))
@@ -213,14 +239,14 @@ for alpha in list_alpha:
     bayes = naive_bayes.MultinomialNB(alpha=alpha)
     bayes.fit(X_tfid, y_train)
     score_train_bayes[count] = bayes.score(X_tfid, y_train)
-    score_test_bayes[count]= bayes.score(X_test_tfid, y_test)
+    score_test_bayes[count] = bayes.score(X_test_tfid, y_test)
     recall_test_bayes[count] = metrics.recall_score(y_test, bayes.predict(X_test_tfid))
     precision_test_bayes[count] = metrics.precision_score(y_test, bayes.predict(X_test_tfid))
     count = count + 1
 
 matrix = np.matrix(np.c_[list_alpha, score_train_bayes, score_test_bayes, recall_test_bayes, precision_test_bayes])
-models = pd.DataFrame(data = matrix, columns = 
-             ['alpha', 'Train Accuracy', 'Test Accuracy', 'Test Recall', 'Test Precision'])
+models = pd.DataFrame(data=matrix, columns=
+['alpha', 'Train Accuracy', 'Test Accuracy', 'Test Recall', 'Test Precision'])
 models
 
 best_idx = models['Test Precision'].idxmax()
@@ -230,17 +256,17 @@ best_bayes = naive_bayes.MultinomialNB(alpha=models.iloc[best_idx, 0])
 best_bayes.fit(X_tfid, y_train)
 
 m_confusion_test = metrics.confusion_matrix(y_test, best_bayes.predict(X_test_tfid))
-pd.DataFrame(data = m_confusion_test, columns = ['Predicted ham', 'Predicted spam'],
-            index = ['Actual ham', 'Actual spam'])
+pd.DataFrame(data=m_confusion_test, columns=['Predicted ham', 'Predicted spam'],
+             index=['Actual ham', 'Actual spam'])
 
 probs = bayes.predict_proba(X_test_tfid)
-preds = probs[:,1]
+preds = probs[:, 1]
 fpr, tpr, threshold = metrics.roc_curve(y_test, preds)
 roc_auc = metrics.auc(fpr, tpr)
 plt.title('Spam detection with Bayes')
-plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc)
-plt.legend(loc = 'lower right')
-plt.plot([0, 1], [0, 1],'r--')
+plt.plot(fpr, tpr, 'b', label='AUC = %0.2f' % roc_auc)
+plt.legend(loc='lower right')
+plt.plot([0, 1], [0, 1], 'r--')
 plt.xlim([0, 1])
 plt.ylim([0, 1])
 plt.ylabel('True Positive Rate')
@@ -249,32 +275,32 @@ plt.show()
 
 """## SVM"""
 
-#SVM
+# SVM
 from sklearn.svm import SVC
 
-list_C = [10]
+list_C = [1]
 score_train_SVM = np.zeros(len(list_C))
 score_test_SVM = np.zeros(len(list_C))
 recall_test_SVM = np.zeros(len(list_C))
-precision_test_SVM= np.zeros(len(list_C))
+precision_test_SVM = np.zeros(len(list_C))
 count = 0
 for C in list_C:
-    svc = svm.SVC(C=C,probability=True)
+    svc = svm.SVC(C=C, probability=True)
     svc.fit(X_tfid, y_train)
     score_train_SVM[count] = svc.score(X_tfid, y_train)
-    score_test_SVM[count]= svc.score(X_test_tfid, y_test)
+    score_test_SVM[count] = svc.score(X_test_tfid, y_test)
     recall_test_SVM[count] = metrics.recall_score(y_test, svc.predict(X_test_tfid))
     precision_test_SVM[count] = metrics.precision_score(y_test, svc.predict(X_test_tfid))
     count = count + 1
 
 matrix = np.matrix(np.c_[list_C, score_train_SVM, score_test_SVM, recall_test_SVM, precision_test_SVM])
-models = pd.DataFrame(data = matrix, columns = 
-             ['C', 'Train Accuracy', 'Test Accuracy', 'Test Recall', 'Test Precision'])
+models = pd.DataFrame(data=matrix, columns=
+['C', 'Train Accuracy', 'Test Accuracy', 'Test Recall', 'Test Precision'])
 models.head(n=10)
 
 matrix = np.matrix(np.c_[list_C, score_train_SVM, score_test_SVM, recall_test_SVM, precision_test_SVM])
-models = pd.DataFrame(data = matrix, columns = 
-             ['C', 'Train Accuracy', 'Test Accuracy', 'Test Recall', 'Test Precision'])
+models = pd.DataFrame(data=matrix, columns=
+['C', 'Train Accuracy', 'Test Accuracy', 'Test Recall', 'Test Precision'])
 models.head(n=10)
 
 best_index = models['Test Precision'].idxmax()
@@ -282,20 +308,20 @@ models.iloc[best_index, :]
 
 best_svc = svm.SVC(C=models.iloc[best_index, 0], probability=True)
 
-best_svc.fit(X_tfid,dataset_filtered['class'])
+best_svc.fit(X_tfid, dataset_filtered['class'])
 
 m_confusion_test = metrics.confusion_matrix(y_test, best_svc.predict(X_test_tfid))
-pd.DataFrame(data = m_confusion_test, columns = ['Predicted ham', 'Predicted spam'],
-            index = ['Actual ham', 'Actual spam'])
+pd.DataFrame(data=m_confusion_test, columns=['Predicted ham', 'Predicted spam'],
+             index=['Actual ham', 'Actual spam'])
 
 probs = best_svc.predict_proba(X_test_tfid)
-preds = probs[:,1]
+preds = probs[:, 1]
 fpr, tpr, threshold = metrics.roc_curve(y_test, preds)
 roc_auc = metrics.auc(fpr, tpr)
 plt.title('Spam detection with SVM')
-plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc)
-plt.legend(loc = 'lower right')
-plt.plot([0, 1], [0, 1],'r--')
+plt.plot(fpr, tpr, 'b', label='AUC = %0.2f' % roc_auc)
+plt.legend(loc='lower right')
+plt.plot([0, 1], [0, 1], 'r--')
 plt.xlim([0, 1])
 plt.ylim([0, 1])
 plt.ylabel('True Positive Rate')
@@ -305,19 +331,19 @@ plt.show()
 """# Comparazione fra i due modelli"""
 
 probs = bayes.predict_proba(X_test_tfid)
-preds = probs[:,1]
+preds = probs[:, 1]
 fpr, tpr, threshold = metrics.roc_curve(y_test, preds)
 roc_auc = metrics.auc(fpr, tpr)
-plt.plot(fpr, tpr, 'g', label = 'AUC BAYES = %0.2f' % roc_auc)
+plt.plot(fpr, tpr, 'g', label='AUC BAYES = %0.2f' % roc_auc)
 
 probs = best_svc.predict_proba(X_test_tfid)
-preds = probs[:,1]
+preds = probs[:, 1]
 fpr, tpr, threshold = metrics.roc_curve(y_test, preds)
 roc_auc = metrics.auc(fpr, tpr)
 plt.title('Comparison between the two families')
-plt.plot(fpr, tpr, 'b', label = 'AUC SVM = %0.2f' % roc_auc)
-plt.legend(loc = 'lower right')
-plt.plot([0, 1], [0, 1],'r--')
+plt.plot(fpr, tpr, 'b', label='AUC SVM = %0.2f' % roc_auc)
+plt.legend(loc='lower right')
+plt.plot([0, 1], [0, 1], 'r--')
 plt.xlim([0, 1])
 plt.ylim([0, 1])
 plt.ylabel('True Positive Rate')
@@ -327,6 +353,7 @@ plt.show()
 """# Saving the classifier"""
 
 import joblib
+
 joblib.dump(vectorizer, 'features.joblib')
 joblib.dump(best_svc, 'best_svc.joblib')
 joblib.dump(best_bayes, 'best_bayes.joblib')
@@ -355,7 +382,8 @@ df['message'] = df['message'].apply(stemming)
 record = vectorizer.transform(df['message']).todense()
 best_svc.predict(record)
 
-message = ["Hi I'm Matt I changed my number recently, the new one is this: 0781293091. You can add me so we can organize a dinner together in the next days"]
+message = [
+    "Hi I'm Matt I changed my number recently, the new one is this: 0781293091. You can add me so we can organize a dinner together in the next days"]
 d = {'message': message}
 df = pd.DataFrame(data=d)
 df['message'] = df['message'].apply(remove_stopwords)
